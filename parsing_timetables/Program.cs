@@ -38,6 +38,15 @@ namespace parsing_timetables
 			foreach (var link in groups) {
 				Console.WriteLine (link);
 			}
+
+
+			var primary_timetable_url = TimetableParser.getPrimaryTimetableLink (groups [groups.Count - 1].url);
+			Console.WriteLine ("Ссылка на страницу основного расписания: "
+				+ primary_timetable_url
+			);
+
+			Console.WriteLine ("Расписание");
+			TimetableParser.getTimetable (primary_timetable_url);
 		}
 	}
 }
