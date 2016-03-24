@@ -1,0 +1,13 @@
+﻿<Properties StartupItem="parsing_timetables/parsing_timetables.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="parsing_timetables/TimetableParser.cs">
+    <Files>
+      <File FileName="parsing_timetables/Program.cs" Line="14" Column="38" />
+      <File FileName="parsing_timetables/TimetableParser.cs" Line="49" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

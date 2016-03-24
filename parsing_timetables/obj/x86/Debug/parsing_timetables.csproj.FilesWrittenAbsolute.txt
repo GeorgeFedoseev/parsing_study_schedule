@@ -1,0 +1,6 @@
+/Users/George/Projects/parsing_timetables/parsing_timetables/obj/x86/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/Users/George/Projects/parsing_timetables/parsing_timetables/bin/Debug/parsing_timetables.exe.mdb
+/Users/George/Projects/parsing_timetables/parsing_timetables/bin/Debug/parsing_timetables.exe
+/Users/George/Projects/parsing_timetables/parsing_timetables/obj/x86/Debug/parsing_timetables.exe
+/Users/George/Projects/parsing_timetables/parsing_timetables/obj/x86/Debug/parsing_timetables.exe.mdb
+/Users/George/Projects/parsing_timetables/parsing_timetables/bin/Debug/HtmlAgilityPack.dll
