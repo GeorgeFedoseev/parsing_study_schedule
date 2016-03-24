@@ -49,18 +49,18 @@ namespace parsing_timetables
 
 
 
-
-			var tt1 = TimetableParser.getTimetable (primary_timetable_url, DateTime.Now);
+			var currentWeekStart = DateTime.Today.AddDays(-(int)(DateTime.Today.DayOfWeek-1)).Date;
+			var tt1 = TimetableParser.getTimetable (primary_timetable_url, currentWeekStart);
 			Console.WriteLine ("Сейчас идет "+(tt1.weekType==WeekType.Even?"четная":"нечетная")+" неделя");
 			Console.WriteLine(tt1.ToString ());
 
-			var nextWeek = DateTime.Now.AddDays (7);
-			var nextWeekStart = nextWeek.AddDays(-(int)(nextWeek.DayOfWeek-1));
+			var nextWeek = DateTime.Now.AddDays (7).Date;
+			var nextWeekStart = nextWeek.AddDays(-(int)(nextWeek.DayOfWeek-1)).Date;
 
 			var tt2 = TimetableParser.getTimetable (primary_timetable_url, nextWeekStart);
 			Console.WriteLine ("\n\nА через неделю ("+nextWeekStart.ToString ("yyyy-MM-dd")+") будет "
 				+(tt2.weekType==WeekType.Even?"четная":"нечетная")+" неделя");
-			Console.WriteLine(tt2.ToString ());
+			//Console.WriteLine(tt2.ToString ());
 		}
 
 

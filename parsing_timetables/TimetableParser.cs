@@ -16,22 +16,30 @@ namespace parsing_timetables
 
 
 	public class WeekTimetable {
+		public DateTime weekStartDay;
 		public List<DayTimetable> days;
 		public WeekType weekType;
 
-		public WeekTimetable(WeekType _weekType){
-			weekType = _weekType;
+		public WeekTimetable(DateTime _weekStartDay){
+			weekStartDay = _weekStartDay;
+			weekType = GetIso8601WeekNumber(weekStartDay)%2==0?WeekType.Even:WeekType.Odd;
 			days = new List<DayTimetable> ();
+		}
+
+		private static int GetIso8601WeekNumber(DateTime date)
+		{    var thursday = date.AddDays(3 - ((int)date.DayOfWeek + 6) % 7);
+			return 1 + (thursday.DayOfYear - 1) / 7;
 		}
 
 		public override string ToString () {
 			var t = "";
 			t += "\n";
-			t += weekType==WeekType.Even?"Четная неделя":"Нечетная неделя"+"\n";
+			t += (weekType==WeekType.Even?"Четная неделя":"Нечетная неделя")+"\n";
+			t += weekStartDay.ToString ("yyyy-MM-dd")+"\n";
 			foreach (var d in days) {
-				t += "\n|"+d.day_of_week+"|\n";
+				t += "\n|"+d.day.DayOfWeek+"| ("+d.day.ToString ("yyyy-MM-dd")+")\n";
 				foreach (var p in d.pairs) {
-					t += p.time+"\n";
+					t += p.startTime.ToString("yyyy-MM-dd HH:mm")+" - "+p.endTime.ToString("yyyy-MM-dd HH:mm")+"\n";
 					t += p.name+"\n";
 					t += p.location+"\n";
 					t += p.lecturer+"\n";
@@ -44,28 +52,64 @@ namespace parsing_timetables
 	}
 
 	public class DayTimetable {
-		public DayOfWeek day_of_week;
+		public DateTime day;
 		public List<Pair> pairs;
 
-		public DayTimetable(DayOfWeek _dofw){
-			day_of_week = _dofw;
+		public DayTimetable(DateTime _day){
+			day = _day;
 			pairs = new List<Pair> ();
 		}
 	}
 
 	public class Pair {
+		private DateTime day;
+
 		public string name;
 		public string time;
 		public string location;
 		public string lecturer;
 
-		public Pair(string _name, string _time, string _location, string _lecturer){
+		public string room;
+
+		public DateTime startTime;
+		public DateTime endTime;
+
+		public Pair(DateTime _day, string _name, string _time, string _location, string _lecturer){
+			day = _day;
 			name = _name;
 			time = _time;
 			location = _location;
 			lecturer = _lecturer;
 
+			parseRoom ();
+			parseTime ();
+		}
 
+		private void parseRoom(){
+			var parser = new Regex(@"([0-9]{3}[А-Я]?)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			//Console.WriteLine ("Location: "+location);
+			room = parser.Match (location).Groups [1].Value;
+			//Console.WriteLine ("Room: "+room);
+		}
+
+		private void parseTime(){
+			//Console.WriteLine ("Time: "+time);
+			var time_parts = time.Split ('–');
+			var time1 = time_parts [0];
+			var time2 = time_parts [1];
+
+			var t1_parts = time1.Split (':');
+			var t1_h = int.Parse(t1_parts [0]);
+			var t1_m = int.Parse(t1_parts [1]);
+			startTime = day.AddHours (t1_h).AddMinutes (t1_m);
+
+			var t2_parts = time2.Split (':');
+			var t2_h = int.Parse(t2_parts [0]);
+			var t2_m = int.Parse(t2_parts [1]);
+			endTime = day.AddHours (t2_h).AddMinutes (t2_m);		
+
+			//Console.WriteLine (startTime.ToString("yyyy-MM-dd HH:mm"));
+			//Console.WriteLine (endTime.ToString("yyyy-MM-dd HH:mm"));
 		}
 	}
 
@@ -85,15 +129,12 @@ namespace parsing_timetables
 
 	public class TimetableParser {
 
-		private static int GetIso8601WeekNumber(DateTime date)
-		{    var thursday = date.AddDays(3 - ((int)date.DayOfWeek + 6) % 7);
-			return 1 + (thursday.DayOfYear - 1) / 7;
-		}
 
-		public static WeekTimetable getTimetable(string timetable_url, DateTime timetable_day){
-			var timetable = new WeekTimetable (GetIso8601WeekNumber(timetable_day)%2==0?WeekType.Even:WeekType.Odd);
 
-			var formatted_date = timetable_day.ToString ("yyyy-MM-dd");
+		public static WeekTimetable getTimetable(string timetable_url, DateTime week_start){
+			var timetable = new WeekTimetable (week_start);
+
+			var formatted_date = week_start.ToString ("yyyy-MM-dd");
 			var html = getHtmlFromUrl("http://timetable.spbu.ru"+timetable_url+"/"+formatted_date);
 
 			var dayNodes = html.DocumentNode.SelectNodes ("*//div[contains(@class, 'panel-default')]");
@@ -101,7 +142,10 @@ namespace parsing_timetables
 				foreach (var d in dayNodes) {
 					var day_of_week_str = d.SelectSingleNode ("*//*[@class='panel-title']/text()").InnerText.Trim ();
 					var day_of_week = parseDayOfWeek (day_of_week_str);
-					var day = new DayTimetable (day_of_week);
+
+					//Console.WriteLine (day_of_week+" - "+week_start.AddDays((int)day_of_week-1).Date.DayOfWeek);
+
+					var dayTimetable = new DayTimetable (week_start.AddDays((int)day_of_week-1).Date);
 
 					// parse day pairs
 
@@ -116,15 +160,15 @@ namespace parsing_timetables
 							//Console.WriteLine (name);
 							//Console.WriteLine (location);
 							//Console.WriteLine (lecturer);
-							var pair = new Pair (name, time, location, lecturer);
-							day.pairs.Add (pair);
+							var pair = new Pair (dayTimetable.day, name, time, location, lecturer);
+							dayTimetable.pairs.Add (pair);
 
 						}
 					} else {
 						Console.WriteLine ("Pairs Not found");
 					}
 
-					timetable.days.Add (day);
+					timetable.days.Add (dayTimetable);
 				}
 			} else {
 				Console.WriteLine ("Days Not found");
@@ -134,6 +178,7 @@ namespace parsing_timetables
 
 			return timetable;
 		}
+
 
 
 
