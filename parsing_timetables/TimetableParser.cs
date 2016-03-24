@@ -15,6 +15,11 @@ namespace parsing_timetables
 			name = _name;
 			url = _url;
 		}
+
+		public override string ToString ()
+		{
+			return name + " : " + url;
+		}
 	}
 
 	public class TimetableParser {
@@ -67,6 +72,20 @@ namespace parsing_timetables
 			if (studyProgramNodes != null) {
 				foreach (var n in studyProgramNodes) {
 					res.Add (getPlainText(n).Trim());
+				}	
+			}
+
+			return res;
+		}
+
+		public static List<Link> getProgramYears(string level, string program){
+			var res = new List<Link> ();
+			var html = getHtmlFromUrl("http://timetable.spbu.ru/AMCP");
+
+			var programYearsNodes = html.DocumentNode.SelectNodes ("//div[@id='accordion']/div/div[@class='panel-heading']//a[contains(text(), '"+level+"')]/../../../ul/li/div[contains(text(), '"+program+"')]/../div/a");
+			if (programYearsNodes != null) {
+				foreach (var n in programYearsNodes) {
+					res.Add (new Link(getPlainText(n).Trim(), n.Attributes["href"].Value));
 				}	
 			}
 
