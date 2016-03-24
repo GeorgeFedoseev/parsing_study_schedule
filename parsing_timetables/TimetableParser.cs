@@ -9,14 +9,37 @@ using System.Text.RegularExpressions;
 
 namespace parsing_timetables
 {
-
+	public enum WeekType {
+		Even, // четная
+		Odd
+	}
 
 
 	public class WeekTimetable {
 		public List<DayTimetable> days;
+		public WeekType weekType;
 
-		public WeekTimetable(){
+		public WeekTimetable(WeekType _weekType){
+			weekType = _weekType;
 			days = new List<DayTimetable> ();
+		}
+
+		public override string ToString () {
+			var t = "";
+			t += "\n";
+			t += weekType==WeekType.Even?"Четная неделя":"Нечетная неделя"+"\n";
+			foreach (var d in days) {
+				t += "\n|"+d.day_of_week+"|\n";
+				foreach (var p in d.pairs) {
+					t += p.time+"\n";
+					t += p.name+"\n";
+					t += p.location+"\n";
+					t += p.lecturer+"\n";
+					t += "------"+"\n";
+				}
+			}
+
+			return t;			
 		}
 	}
 
@@ -62,10 +85,16 @@ namespace parsing_timetables
 
 	public class TimetableParser {
 
-		public static WeekTimetable getTimetable(string timetable_url){
-			var timetable = new WeekTimetable ();
+		private static int GetIso8601WeekNumber(DateTime date)
+		{    var thursday = date.AddDays(3 - ((int)date.DayOfWeek + 6) % 7);
+			return 1 + (thursday.DayOfYear - 1) / 7;
+		}
 
-			var html = getHtmlFromUrl("http://timetable.spbu.ru"+timetable_url);
+		public static WeekTimetable getTimetable(string timetable_url, DateTime timetable_day){
+			var timetable = new WeekTimetable (GetIso8601WeekNumber(timetable_day)%2==0?WeekType.Even:WeekType.Odd);
+
+			var formatted_date = timetable_day.ToString ("yyyy-MM-dd");
+			var html = getHtmlFromUrl("http://timetable.spbu.ru"+timetable_url+"/"+formatted_date);
 
 			var dayNodes = html.DocumentNode.SelectNodes ("*//div[contains(@class, 'panel-default')]");
 			if (dayNodes != null) {
@@ -82,10 +111,13 @@ namespace parsing_timetables
 							var time = pairNode.SelectSingleNode ("div[contains(@class, 'studyevent-datetime')]").InnerText.Trim();
 							var name = pairNode.SelectSingleNode ("div[contains(@class, 'studyevent-subject')]").InnerText.Trim();
 							var location = getAllText(pairNode.SelectSingleNode ("div[contains(@class, 'locations')]")).Trim();
-							Console.WriteLine (time);
-							Console.WriteLine (name);
-							Console.WriteLine (location);
-
+							var lecturer = getAllText(pairNode.SelectSingleNode ("div[contains(@class, 'educators')]")).Trim();
+							//Console.WriteLine (time);
+							//Console.WriteLine (name);
+							//Console.WriteLine (location);
+							//Console.WriteLine (lecturer);
+							var pair = new Pair (name, time, location, lecturer);
+							day.pairs.Add (pair);
 
 						}
 					} else {
@@ -102,6 +134,9 @@ namespace parsing_timetables
 
 			return timetable;
 		}
+
+
+
 
 		private static DayOfWeek parseDayOfWeek(string str){
 			var parser = new Regex(@"(\w+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -171,7 +206,7 @@ namespace parsing_timetables
 		}
 
 		private static string getAllText(HtmlNode node){
-			var t = "";
+			var t = getPlainText(node);
 			var textNodes = node.SelectNodes ("*//text()");
 
 			if (textNodes != null) {

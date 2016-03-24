@@ -45,8 +45,27 @@ namespace parsing_timetables
 				+ primary_timetable_url
 			);
 
-			Console.WriteLine ("Расписание");
-			TimetableParser.getTimetable (primary_timetable_url);
+			Console.WriteLine ("Парсим расписание..");
+
+
+
+
+			var tt1 = TimetableParser.getTimetable (primary_timetable_url, DateTime.Now);
+			Console.WriteLine ("Сейчас идет "+(tt1.weekType==WeekType.Even?"четная":"нечетная")+" неделя");
+			Console.WriteLine(tt1.ToString ());
+
+			var nextWeek = DateTime.Now.AddDays (7);
+			var nextWeekStart = nextWeek.AddDays(-(int)(nextWeek.DayOfWeek-1));
+
+			var tt2 = TimetableParser.getTimetable (primary_timetable_url, nextWeekStart);
+			Console.WriteLine ("\n\nА через неделю ("+nextWeekStart.ToString ("yyyy-MM-dd")+") будет "
+				+(tt2.weekType==WeekType.Even?"четная":"нечетная")+" неделя");
+			Console.WriteLine(tt2.ToString ());
 		}
+
+
+
 	}
+
+
 }
