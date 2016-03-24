@@ -40,12 +40,13 @@ namespace parsing_timetables
 			}
 
 
-			var primary_timetable_url = TimetableParser.getPrimaryTimetableLink (groups [groups.Count - 1].url);
-			Console.WriteLine ("Ссылка на страницу основного расписания: "
+			var selectGroup = groups.Count - 1;
+			var primary_timetable_url = TimetableParser.getPrimaryTimetableLink (groups [selectGroup].url);
+			Console.WriteLine ("\nСсылка на страницу основного расписания для группы "+groups [selectGroup].name+": "
 				+ primary_timetable_url
 			);
 
-			Console.WriteLine ("Парсим расписание..");
+			Console.WriteLine ("\nПарсим расписание..");
 
 
 
@@ -60,7 +61,7 @@ namespace parsing_timetables
 			var tt2 = TimetableParser.getTimetable (primary_timetable_url, nextWeekStart);
 			Console.WriteLine ("\n\nА через неделю ("+nextWeekStart.ToString ("yyyy-MM-dd")+") будет "
 				+(tt2.weekType==WeekType.Even?"четная":"нечетная")+" неделя");
-			//Console.WriteLine(tt2.ToString ());
+			Console.WriteLine(tt2.ToString ());
 		}
 
 

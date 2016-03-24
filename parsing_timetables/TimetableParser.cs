@@ -42,6 +42,7 @@ namespace parsing_timetables
 					t += p.startTime.ToString("yyyy-MM-dd HH:mm")+" - "+p.endTime.ToString("yyyy-MM-dd HH:mm")+"\n";
 					t += p.name+"\n";
 					t += p.location+"\n";
+					t += "room: " + p.room+"\n";
 					t += p.lecturer+"\n";
 					t += "------"+"\n";
 				}
@@ -86,7 +87,7 @@ namespace parsing_timetables
 		}
 
 		private void parseRoom(){
-			var parser = new Regex(@"([0-9]{3}[А-Я]?)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			var parser = new Regex(@"([0-9]*[А-Я]?)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			//Console.WriteLine ("Location: "+location);
 			room = parser.Match (location).Groups [1].Value;
 			//Console.WriteLine ("Room: "+room);
@@ -326,7 +327,19 @@ namespace parsing_timetables
 
 		public static string getPrimaryTimetableLink(string group_link){
 			var html = getHtmlFromUrl("http://timetable.spbu.ru"+group_link);
-			var linkNode = html.DocumentNode.SelectSingleNode ("//a[contains(@href, 'Primary')]");
+			var linkNodes = html.DocumentNode.SelectNodes ("//a[contains(@href, 'Primary')]");
+
+			var maxTableId = 0;
+			var linkNode = linkNodes [0];
+			var idParser = new Regex(@"([0-9]*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			foreach (var n in linkNodes) {
+				var t_id = int.Parse (idParser.Match (n.Attributes ["href"].Value).Groups [1].Value);
+				if (t_id > maxTableId) {
+					linkNode = n;
+					maxTableId = t_id;
+				}
+			}
+
 			if (linkNode != null) {
 				return linkNode.Attributes ["href"].Value;
 			}
