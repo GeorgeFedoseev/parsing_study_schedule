@@ -11,9 +11,14 @@ namespace parsing_timetables
 	{
 		public static void Main (string[] args)
 		{
-			var studyLervels = TimetableParser.getStudyLevels ();
-			foreach (var sl in studyLervels) {
+			var studyLevels = TimetableParser.getStudyLevels ();
+			foreach (var sl in studyLevels) {
 				Console.WriteLine (sl);
+			}
+
+			var levelPrograms = TimetableParser.getLevelPrograms ("Бакалавриат");
+			foreach (var lp in levelPrograms) {
+				Console.WriteLine (lp);
 			}
 		}
 	}

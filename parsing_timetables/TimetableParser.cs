@@ -59,6 +59,20 @@ namespace parsing_timetables
 			return res;
 		}
 
+		public static List<string> getLevelPrograms(string level){
+			var res = new List<string> ();
+			var html = getHtmlFromUrl("http://timetable.spbu.ru/AMCP");
+
+			var studyProgramNodes = html.DocumentNode.SelectNodes ("//div[@id='accordion']/div/div[@class='panel-heading']//a[contains(text(), '"+level+"')]/../../../ul/li/div[count(*)=0]");
+			if (studyProgramNodes != null) {
+				foreach (var n in studyProgramNodes) {
+					res.Add (getPlainText(n).Trim());
+				}	
+			}
+
+			return res;
+		}
+
 	}
 }
 
