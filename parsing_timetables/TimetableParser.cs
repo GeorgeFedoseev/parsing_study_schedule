@@ -5,6 +5,7 @@ using System.Xml;
 using System.Collections.Generic;
 
 using HtmlAgilityPack;
+using System.Text.RegularExpressions;
 
 namespace parsing_timetables
 {
@@ -99,7 +100,12 @@ namespace parsing_timetables
 			var groupNodes = html.DocumentNode.SelectNodes ("//ul[@id='studentGroupsForCurrentYear']/li/div[@class='tile']");
 			if (groupNodes != null) {
 				foreach (var n in groupNodes) {
-					res.Add (new Link(n.SelectSingleNode("div/text()").InnerText.Trim(), n.Attributes["onclick"].Value));
+					var linkParser = new Regex(@"'/\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+					res.Add (
+						new Link(n.SelectSingleNode("div/text()").InnerText.Trim(),
+							linkParser.Match(n.Attributes["onclick"].Value).Value
+						)
+					);
 				}	
 
 			}
