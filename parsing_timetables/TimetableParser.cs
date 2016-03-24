@@ -92,6 +92,21 @@ namespace parsing_timetables
 			return res;
 		}
 
+		public static List<Link> getGroups(string relative_url){
+			var res = new List<Link> ();
+			var html = getHtmlFromUrl("http://timetable.spbu.ru"+relative_url);
+
+			var groupNodes = html.DocumentNode.SelectNodes ("//ul[@id='studentGroupsForCurrentYear']/li/div[@class='tile']");
+			if (groupNodes != null) {
+				foreach (var n in groupNodes) {
+					res.Add (new Link(n.SelectSingleNode("div/text()").InnerText.Trim(), n.Attributes["onclick"].Value));
+				}	
+
+			}
+
+			return res;
+		}
+
 	}
 }
 

@@ -34,8 +34,8 @@ namespace parsing_timetables
 
 			var selectYear = 2;
 			Console.WriteLine ("\nГруппы года поступления "+years[selectYear].name);
-			var groups = TimetableParser.getProgramYears (studyLevels[selectLevel], levelPrograms[selectProgram]);
-			foreach (var link in years) {
+			var groups = TimetableParser.getGroups (years[selectYear].url);
+			foreach (var link in groups) {
 				Console.WriteLine (link);
 			}
 		}
